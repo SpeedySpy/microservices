@@ -2,33 +2,67 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const app = express();
+
 app.use(bodyParser.json());
 
 let authors = [
-    { id:1, name:"Biraveen1"},
-    { id:2, name:"Biraveen2"},
-    { id:3, name:"Biraveen3"},
-    { id:4, name:"Biraveen4"},
-    { id:5, name:"Biraveen5"},   
+    { id: 1, name: "aa"},
+    { id: 2, name: "bb"},
+    { id: 3, name: "cc"},
+    { id: 4, name: "dd"},
 ];
 
-app.get('/authors', async (req,res)=>{
+app.get('/authors', async (req, res) => {
     res.json(authors)
 });
 
-app.get('/authors/:id', (req,res)=>{
-const id = parseInt(req.params.id);
-const author = authors.find(author =>author.id === id);
+app.get('/authors/:id', async (req, res) => {
+    const id = parseInt(req.params.id);
+    const author = authors.find(author => author.id === id);
 
-if (author){
-    res.json(authors)
-}else{
-    res.status(404).json({error:'Author non trouvé'})
-}
-})
+    if(author){
+        res.json(author)
+    }
+    else{
+        res.status(404).json({error: 'Auteur non trouvé'});
+    }
+});
 
+// add author
+app.post('/authors', (req, res) => {
+    const { name } = req.body;
+    const id = authors.length ? authors[authors.length - 1].id + 1 : 1;
+    const author = { id, name };
+  
+    authors.push(author);
+    res.status(201).json(author);
+});
 
-app.listen(4000, ()=> {
-    console.log("Microservice de gestion des auteurs")
+// modify author
+app.put('/authors/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const { name } = req.body;
+  
+    let author = authors.find(author => author.id === id);
+  
+    if (!author) return res.status(404).json({ message: 'Auteur non trouvé.' });
+  
+    author.name = name;
+  
+    res.status(200).json(author);
+  });
+  
+  // delete author
+app.delete('/authors/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    let author = authors.find(author => author.id === id);
+  
+    if (!author) return res.status(404).json({ message: 'Auteur non trouvé.' });
+  
+    authors = authors.filter(author => author.id !== id);
+    res.status(200).json({ message: 'Auteur supprimé.' });
+});
 
-} )
+app.listen(4000, () => {
+    console.log("Microservices de gestion des auteurs démarré sur le port 4000")
+});
